@@ -1,10 +1,10 @@
 "use client";
 
 import { AlertCircle } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { sileo } from "sileo";
+import { usePathname, useRouter } from "next/navigation";
 import { EventCard } from "./event-card";
-import { useDeleteEventMutation } from "@/features/events/use-delete-event-mutation";
+import { useEventDeleteAction } from "@/features/events/use-event-delete-action";
+import { useFilteredEvents } from "@/features/events/use-filtered-events";
 import { useEventsQuery } from "@/features/events/use-events-query";
 import { EventsSkeleton } from "./events-skeleton";
 import { FeedbackState } from "../ui/feedback-state";
@@ -22,35 +22,10 @@ function formatDateLabel(iso: string) {
 
 export function EventsList() {
     const router = useRouter();
-    const deleteEventMutation = useDeleteEventMutation();
+    const pathname = usePathname();
+    const { requestDelete } = useEventDeleteAction();
     const { data: events = [], isLoading, isError, refetch } = useEventsQuery();
-
-    const requestDelete = (id: string, title: string) => {
-        sileo.action({
-            title: "Delete this event?",
-            description: `You are about to delete \"${title}\". This action cannot be undone.`,
-            button: {
-                title: "Delete",
-                onClick: async () => {
-                    try {
-                        await deleteEventMutation.mutateAsync(id);
-                        sileo.success({
-                            title: "Event deleted",
-                            description: "The event was removed successfully.",
-                        });
-                    } catch (error) {
-                        sileo.error({
-                            title: "Failed to delete event",
-                            description:
-                                error instanceof Error
-                                    ? error.message
-                                    : "Please try again in a moment.",
-                        });
-                    }
-                },
-            },
-        });
-    };
+    const { filteredEvents, hasFilters } = useFilteredEvents(events);
 
     if (isLoading) return <EventsSkeleton />;
 
@@ -75,9 +50,35 @@ export function EventsList() {
         );
     }
 
+    if (!filteredEvents.length) {
+        return (
+            <FeedbackState
+                title="No events match your filters"
+                description="Try changing search terms or clearing filters."
+                action={
+                    hasFilters ? (
+                        <button
+                            type="button"
+                            onClick={() =>
+                                router.replace(pathname, { scroll: false })
+                            }
+                            className="rounded-lg border border-[#d7dee9] bg-white px-3 py-2 text-sm font-semibold text-[#334155] transition hover:bg-[#f8fafc]"
+                        >
+                            Clear filters
+                        </button>
+                    ) : undefined
+                }
+            />
+        );
+    }
+
     return (
-        <div className="grid grid-cols-1 gap-4 p-3 sm:p-4 md:grid-cols-2 xl:grid-cols-3">
-            {events.map((event) => (
+        <div
+            id="events-list"
+            aria-live="polite"
+            className="grid grid-cols-1 gap-4 p-3 sm:p-4 md:grid-cols-2 xl:grid-cols-3"
+        >
+            {filteredEvents.map((event) => (
                 <EventCard
                     key={event.id}
                     eventCode={event.eventCode}
