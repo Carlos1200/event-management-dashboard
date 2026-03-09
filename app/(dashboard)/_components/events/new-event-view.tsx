@@ -7,30 +7,33 @@ import { FeedbackState } from "../ui/feedback-state";
 import { RetryButton } from "../ui/retry-button";
 import { CreateEventFormSkeleton } from "./create-event-form-skeleton";
 
-type EditEventViewProps = {
-    eventId: string;
+type NewEventViewProps = {
+    duplicateFrom?: string;
 };
 
-export function EditEventView({ eventId }: EditEventViewProps) {
-    const { data: event, isLoading, isError, refetch } = useEventQuery(eventId);
+export function NewEventView({ duplicateFrom }: NewEventViewProps) {
+    const {
+        data: sourceEvent,
+        isLoading,
+        isError,
+        refetch,
+    } = useEventQuery(duplicateFrom ?? "");
 
-    if (isLoading) {
+    if (duplicateFrom && isLoading) {
         return <CreateEventFormSkeleton />;
     }
 
-    if (isError || !event) {
+    if (duplicateFrom && (isError || !sourceEvent)) {
         return (
             <FeedbackState
                 tone="error"
                 icon={<AlertCircle className="h-5 w-5 text-red-600" />}
-                title="We couldn't load this event"
+                title="We couldn't load source event"
                 description="Try again in a moment."
                 action={<RetryButton onClick={() => refetch()} />}
             />
         );
     }
 
-    return (
-        <CreateEventForm mode="edit" eventId={eventId} initialEvent={event} />
-    );
+    return <CreateEventForm initialEvent={sourceEvent} />;
 }

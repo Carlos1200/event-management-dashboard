@@ -12,6 +12,7 @@ function createTimeoutController() {
 function toUpstreamPayload(input: CreateEventInput) {
   return {
     title: input.title.trim(),
+    description: input.description.trim(),
     status: input.status,
     startAt: new Date(input.startAt).toISOString(),
     locationText: input.locationText.trim(),
@@ -81,7 +82,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Invalid request body" }, { status: 400 });
   }
 
-  if (!input?.title || (!input?.isVirtual && !input?.locationText) || !input?.startAt || !input?.status) {
+  if (!input?.title || !input?.description || (!input?.isVirtual && !input?.locationText) || !input?.startAt || !input?.status) {
     return NextResponse.json(
       { message: "Missing required event fields" },
       { status: 400 },

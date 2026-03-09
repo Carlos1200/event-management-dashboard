@@ -43,6 +43,7 @@ export const CreateEventForm = ({
         resolver: yupResolver(createEventFormSchema),
         defaultValues: {
             title: "",
+            description: "",
             status: "pending",
             startDate: "",
             startTime: "",
@@ -166,6 +167,27 @@ export const CreateEventForm = ({
                         {errors.status ? (
                             <p className="text-xs text-red-600">
                                 {errors.status.message}
+                            </p>
+                        ) : null}
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <label
+                            className="text-sm font-semibold text-[#334155]"
+                            htmlFor="description"
+                        >
+                            Description
+                        </label>
+                        <textarea
+                            id="description"
+                            rows={4}
+                            className="w-full resize-y rounded-xl border border-[#d7dee9] bg-white px-3 py-2.5 text-sm text-[#0f172a] outline-none transition focus:border-[#13c8ec]"
+                            placeholder="Describe what attendees can expect from this event."
+                            {...register("description")}
+                        />
+                        {errors.description ? (
+                            <p className="text-xs text-red-600">
+                                {errors.description.message}
                             </p>
                         ) : null}
                     </div>

@@ -1,5 +1,12 @@
-import { CreateEventForm } from "../../_components/events/create-event-form";
+import { NewEventView } from "@/app/(dashboard)/_components/events/new-event-view";
 
-export default function NewEventPage() {
-    return <CreateEventForm />;
+type NewEventPageProps = {
+    searchParams: Promise<{ duplicateFrom?: string }>;
+};
+
+export default async function NewEventPage({
+    searchParams,
+}: NewEventPageProps) {
+    const { duplicateFrom } = await searchParams;
+    return <NewEventView duplicateFrom={duplicateFrom} />;
 }

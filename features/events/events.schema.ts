@@ -10,6 +10,7 @@ export const eventStatusOptions = [
 
 export type CreateEventFormValues = {
   title: string;
+  description: string;
   status: EventStatus;
   startDate: string;
   startTime: string;
@@ -25,6 +26,12 @@ export const createEventFormSchema: yup.ObjectSchema<CreateEventFormValues> = yu
       .min(3, "Title must have at least 3 characters")
       .max(120, "Title must have at most 120 characters")
       .required("Title is required"),
+    description: yup
+      .string()
+      .trim()
+      .min(10, "Description must have at least 10 characters")
+      .max(1000, "Description must have at most 1000 characters")
+      .required("Description is required"),
     status: yup
       .mixed<EventStatus>()
       .oneOf(eventStatusOptions)
@@ -60,6 +67,7 @@ export function mapFormValuesToCreateEventInput(
 ): CreateEventInput {
   return {
     title: values.title.trim(),
+    description: values.description.trim(),
     status: values.status,
     startAt: `${values.startDate}T${values.startTime}`,
     locationText: values.isVirtual ? "" : values.locationText.trim(),
@@ -77,6 +85,7 @@ export function mapEventToFormValues(event: EventDto): CreateEventFormValues {
 
   return {
     title: event.title,
+    description: event.description ?? "",
     status: event.status,
     startDate: `${year}-${month}-${day}`,
     startTime: `${hours}:${minutes}`,

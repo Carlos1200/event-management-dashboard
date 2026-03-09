@@ -4,6 +4,7 @@ export type EventDto = {
   id: string;
   eventCode: string;
   title: string;
+  description: string;
   status: EventStatus;
   startAt: string;
   locationText: string;
@@ -12,6 +13,7 @@ export type EventDto = {
 
 export type CreateEventInput = {
   title: string;
+  description: string;
   status: EventStatus;
   startAt: string;
   locationText: string;

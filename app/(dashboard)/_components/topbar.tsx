@@ -10,8 +10,7 @@ type TopbarProps = {
 
 export function Topbar({ title }: TopbarProps) {
     const pathname = usePathname();
-    const hideActions =
-        pathname === "/events/new" || pathname.endsWith("/edit");
+    const hideActions = pathname.startsWith("/events/");
 
     return (
         <header className="border-b border-[#e6ebf2] bg-white px-4 pb-4 pt-6 sm:px-6 md:px-8 md:py-5">

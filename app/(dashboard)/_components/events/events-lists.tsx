@@ -87,6 +87,7 @@ export function EventsList() {
                     status={event.status}
                     isVirtual={event.isVirtual}
                     onEdit={() => router.push(`/events/${event.id}/edit`)}
+                    onDetails={() => router.push(`/events/${event.id}`)}
                     onDelete={() => requestDelete(event.id, event.title)}
                 />
             ))}
