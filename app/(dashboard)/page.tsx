@@ -1,7 +1,11 @@
+import type { Metadata } from "next";
+import { EventsList } from "./_components/events/events-lists";
+
+export const metadata: Metadata = {
+    title: "Events",
+    description: "Browse, search, and filter all events in your dashboard.",
+};
+
 export default function DashboardPage() {
-    return (
-        <div>
-            <h2 className="text-2xl font-semibold">Welcome to the Dashboard</h2>
-        </div>
-    );
+    return <EventsList />;
 }
