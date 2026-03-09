@@ -60,3 +60,16 @@ export async function updateEvent(
 
   return (await response.json()) as EventDto;
 }
+
+export async function deleteEvent(id: string): Promise<void> {
+  const response = await fetch(`/api/events/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    const payload = (await response.json().catch(() => null)) as
+      | { message?: string }
+      | null;
+    throw new Error(payload?.message ?? "Failed to delete event");
+  }
+}

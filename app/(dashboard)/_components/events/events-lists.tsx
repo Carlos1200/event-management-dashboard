@@ -2,7 +2,9 @@
 
 import { AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { sileo } from "sileo";
 import { EventCard } from "./event-card";
+import { useDeleteEventMutation } from "@/features/events/use-delete-event-mutation";
 import { useEventsQuery } from "@/features/events/use-events-query";
 import { EventsSkeleton } from "./events-skeleton";
 import { FeedbackState } from "../ui/feedback-state";
@@ -20,7 +22,35 @@ function formatDateLabel(iso: string) {
 
 export function EventsList() {
     const router = useRouter();
+    const deleteEventMutation = useDeleteEventMutation();
     const { data: events = [], isLoading, isError, refetch } = useEventsQuery();
+
+    const requestDelete = (id: string, title: string) => {
+        sileo.action({
+            title: "Delete this event?",
+            description: `You are about to delete \"${title}\". This action cannot be undone.`,
+            button: {
+                title: "Delete",
+                onClick: async () => {
+                    try {
+                        await deleteEventMutation.mutateAsync(id);
+                        sileo.success({
+                            title: "Event deleted",
+                            description: "The event was removed successfully.",
+                        });
+                    } catch (error) {
+                        sileo.error({
+                            title: "Failed to delete event",
+                            description:
+                                error instanceof Error
+                                    ? error.message
+                                    : "Please try again in a moment.",
+                        });
+                    }
+                },
+            },
+        });
+    };
 
     if (isLoading) return <EventsSkeleton />;
 
@@ -57,6 +87,7 @@ export function EventsList() {
                     status={event.status}
                     isVirtual={event.isVirtual}
                     onEdit={() => router.push(`/events/${event.id}/edit`)}
+                    onDelete={() => requestDelete(event.id, event.title)}
                 />
             ))}
         </div>

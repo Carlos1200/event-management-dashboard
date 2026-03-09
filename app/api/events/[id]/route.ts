@@ -135,3 +135,47 @@ export async function PUT(request: Request, context: RouteContext) {
     clearTimeout(timeoutId);
   }
 }
+
+export async function DELETE(_request: Request, context: RouteContext) {
+  const baseUrl = process.env.MOCKAPI_BASE_URL;
+
+  if (!baseUrl) {
+    return NextResponse.json(
+      { message: "Missing MOCKAPI_BASE_URL environment variable" },
+      { status: 500 },
+    );
+  }
+
+  const { id } = await context.params;
+  const { controller, timeoutId } = createTimeoutController();
+
+  try {
+    const response = await fetch(`${baseUrl}/events/${id}`, {
+      method: "DELETE",
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      return NextResponse.json(
+        { message: "Failed to delete event in provider" },
+        { status: response.status === 404 ? 404 : 502 },
+      );
+    }
+
+    return NextResponse.json({ success: true }, { status: 200 });
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      return NextResponse.json(
+        { message: "Upstream request timed out" },
+        { status: 504 },
+      );
+    }
+
+    return NextResponse.json(
+      { message: "Failed to delete event in provider" },
+      { status: 502 },
+    );
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
