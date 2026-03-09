@@ -1,6 +1,7 @@
 "use client";
 
 import { AlertCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { EventCard } from "./event-card";
 import { useEventsQuery } from "@/features/events/use-events-query";
 import { EventsSkeleton } from "./events-skeleton";
@@ -18,6 +19,7 @@ function formatDateLabel(iso: string) {
 }
 
 export function EventsList() {
+    const router = useRouter();
     const { data: events = [], isLoading, isError, refetch } = useEventsQuery();
 
     if (isLoading) return <EventsSkeleton />;
@@ -53,6 +55,8 @@ export function EventsList() {
                     dateLabel={formatDateLabel(event.startAt)}
                     locationText={event.locationText}
                     status={event.status}
+                    isVirtual={event.isVirtual}
+                    onEdit={() => router.push(`/events/${event.id}/edit`)}
                 />
             ))}
         </div>

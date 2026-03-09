@@ -1,5 +1,5 @@
 import * as yup from "yup";
-import type { CreateEventInput, EventStatus } from "./events.types";
+import type { CreateEventInput, EventDto, EventStatus } from "./events.types";
 
 export const eventStatusOptions = [
   "confirmed",
@@ -64,5 +64,23 @@ export function mapFormValuesToCreateEventInput(
     startAt: `${values.startDate}T${values.startTime}`,
     locationText: values.isVirtual ? "" : values.locationText.trim(),
     isVirtual: values.isVirtual,
+  };
+}
+
+export function mapEventToFormValues(event: EventDto): CreateEventFormValues {
+  const startDate = new Date(event.startAt);
+  const year = startDate.getFullYear();
+  const month = String(startDate.getMonth() + 1).padStart(2, "0");
+  const day = String(startDate.getDate()).padStart(2, "0");
+  const hours = String(startDate.getHours()).padStart(2, "0");
+  const minutes = String(startDate.getMinutes()).padStart(2, "0");
+
+  return {
+    title: event.title,
+    status: event.status,
+    startDate: `${year}-${month}-${day}`,
+    startTime: `${hours}:${minutes}`,
+    locationText: event.locationText,
+    isVirtual: event.isVirtual,
   };
 }

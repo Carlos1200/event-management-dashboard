@@ -10,31 +10,32 @@ import {
     createEventFormSchema,
     eventStatusOptions,
     mapFormValuesToCreateEventInput,
+    mapEventToFormValues,
     type CreateEventFormValues,
 } from "@/features/events/events.schema";
 import { useCreateEventMutation } from "@/features/events/use-create-event-mutation";
-import { SectionHeadingProps } from "./event-types";
+import { useUpdateEventMutation } from "@/features/events/use-update-event-mutation";
+import { CreateEventFormProps } from "./event-types";
+import { SectionHeading } from "./section-heading";
 
 const inputClassName =
     "h-12 w-full rounded-xl border border-[#d7dee9] bg-white px-3 text-sm text-[#0f172a] outline-none transition focus:border-[#13c8ec]";
 
-function SectionHeading({ icon, title }: SectionHeadingProps) {
-    return (
-        <div className="flex items-center gap-2 text-xs font-bold tracking-[0.12em] text-[#13c8ec] uppercase">
-            {icon}
-            <span>{title}</span>
-        </div>
-    );
-}
-
-export function CreateEventForm() {
+export const CreateEventForm = ({
+    mode = "create",
+    eventId,
+    initialEvent,
+}: CreateEventFormProps) => {
     const router = useRouter();
     const createEventMutation = useCreateEventMutation();
+    const updateEventMutation = useUpdateEventMutation();
+    const isEditMode = mode === "edit";
 
     const {
         register,
         handleSubmit,
         control,
+        reset,
         setValue,
         clearErrors,
         formState: { errors },
@@ -49,6 +50,14 @@ export function CreateEventForm() {
             isVirtual: false,
         },
     });
+
+    useEffect(() => {
+        if (!initialEvent) {
+            return;
+        }
+
+        reset(mapEventToFormValues(initialEvent));
+    }, [initialEvent, reset]);
 
     const isVirtual = useWatch({
         control,
@@ -66,19 +75,35 @@ export function CreateEventForm() {
     }, [clearErrors, isVirtual, setValue]);
 
     const onSubmit = async (values: CreateEventFormValues) => {
+        const input = mapFormValuesToCreateEventInput(values);
+
         try {
-            await createEventMutation.mutateAsync(
-                mapFormValuesToCreateEventInput(values),
-            );
+            if (isEditMode) {
+                if (!eventId) {
+                    throw new Error("Missing event id");
+                }
+
+                await updateEventMutation.mutateAsync({
+                    id: eventId,
+                    input,
+                });
+            } else {
+                await createEventMutation.mutateAsync(input);
+            }
+
             sileo.success({
-                title: "Event created",
-                description: "Your event was created successfully.",
+                title: isEditMode ? "Event updated" : "Event created",
+                description: isEditMode
+                    ? "Your event was updated successfully."
+                    : "Your event was created successfully.",
             });
             router.push("/");
             router.refresh();
         } catch (error) {
             sileo.error({
-                title: "Failed to create event",
+                title: isEditMode
+                    ? "Failed to update event"
+                    : "Failed to create event",
                 description:
                     error instanceof Error
                         ? error.message
@@ -257,15 +282,21 @@ export function CreateEventForm() {
                     </button>
                     <button
                         type="submit"
-                        disabled={createEventMutation.isPending}
+                        disabled={
+                            createEventMutation.isPending ||
+                            updateEventMutation.isPending
+                        }
                         className="rounded-xl bg-[#13c8ec] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_20px_-12px_rgba(19,200,236,0.8)] transition hover:bg-[#10b7d8] disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                        {createEventMutation.isPending
+                        {createEventMutation.isPending ||
+                        updateEventMutation.isPending
                             ? "Saving..."
-                            : "Save Event"}
+                            : isEditMode
+                              ? "Update Event"
+                              : "Save Event"}
                     </button>
                 </div>
             </form>
         </div>
     );
-}
+};

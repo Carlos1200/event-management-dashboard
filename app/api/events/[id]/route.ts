@@ -16,11 +16,14 @@ function toUpstreamPayload(input: CreateEventInput) {
     startAt: new Date(input.startAt).toISOString(),
     locationText: input.locationText.trim(),
     isVirtual: input.isVirtual,
-    eventCode: `EVT-${Math.floor(1000 + Math.random() * 9000)}`,
   };
 }
 
-export async function GET() {
+type RouteContext = {
+  params: Promise<{ id: string }>;
+};
+
+export async function GET(_request: Request, context: RouteContext) {
   const baseUrl = process.env.MOCKAPI_BASE_URL;
 
   if (!baseUrl) {
@@ -30,22 +33,23 @@ export async function GET() {
     );
   }
 
+  const { id } = await context.params;
   const { controller, timeoutId } = createTimeoutController();
 
   try {
-    const response = await fetch(`${baseUrl}/events`, {
+    const response = await fetch(`${baseUrl}/events/${id}`, {
       cache: "no-store",
       signal: controller.signal,
     });
 
     if (!response.ok) {
       return NextResponse.json(
-        { message: "Failed to fetch events from provider" },
-        { status: 502 },
+        { message: "Failed to fetch event from provider" },
+        { status: response.status === 404 ? 404 : 502 },
       );
     }
 
-    const data = (await response.json()) as EventDto[];
+    const data = (await response.json()) as EventDto;
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {
@@ -56,7 +60,7 @@ export async function GET() {
     }
 
     return NextResponse.json(
-      { message: "Failed to fetch events from provider" },
+      { message: "Failed to fetch event from provider" },
       { status: 502 },
     );
   } finally {
@@ -64,7 +68,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+export async function PUT(request: Request, context: RouteContext) {
   const baseUrl = process.env.MOCKAPI_BASE_URL;
 
   if (!baseUrl) {
@@ -73,6 +77,8 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
+
+  const { id } = await context.params;
 
   let input: CreateEventInput;
   try {
@@ -95,8 +101,8 @@ export async function POST(request: Request) {
   const { controller, timeoutId } = createTimeoutController();
 
   try {
-    const response = await fetch(`${baseUrl}/events`, {
-      method: "POST",
+    const response = await fetch(`${baseUrl}/events/${id}`, {
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
@@ -106,13 +112,13 @@ export async function POST(request: Request) {
 
     if (!response.ok) {
       return NextResponse.json(
-        { message: "Failed to create event in provider" },
-        { status: 502 },
+        { message: "Failed to update event in provider" },
+        { status: response.status === 404 ? 404 : 502 },
       );
     }
 
     const data = (await response.json()) as EventDto;
-    return NextResponse.json(data, { status: 201 });
+    return NextResponse.json(data, { status: 200 });
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {
       return NextResponse.json(
@@ -122,7 +128,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { message: "Failed to create event in provider" },
+      { message: "Failed to update event in provider" },
       { status: 502 },
     );
   } finally {

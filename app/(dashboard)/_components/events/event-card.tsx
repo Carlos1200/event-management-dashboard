@@ -8,6 +8,7 @@ export const EventCard = ({
     dateLabel,
     locationText,
     status,
+    isVirtual,
     onEdit,
     onDetails,
     onDelete,
@@ -38,7 +39,7 @@ export const EventCard = ({
                 </p>
                 <p className="flex items-center gap-2.5">
                     <MapPin className="h-5 w-5 text-[#13c8ec]" />
-                    <span>{locationText}</span>
+                    <span>{isVirtual ? "Virtual Event" : locationText}</span>
                 </p>
             </div>
 

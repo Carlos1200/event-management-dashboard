@@ -9,7 +9,7 @@ export const TextActionButton = ({
     return (
         <button
             type={type}
-            className={`inline-flex items-center justify-center rounded-md px-2 py-1 text-[22px] font-medium transition ${VARIANT_CLASS[variant]} ${className}`}
+            className={`inline-flex items-center justify-center rounded-md px-2 py-1 text-[22px] font-medium transition cursor-pointer ${VARIANT_CLASS[variant]} ${className}`}
             {...props}
         />
     );

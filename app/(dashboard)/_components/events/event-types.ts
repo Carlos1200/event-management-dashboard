@@ -1,3 +1,4 @@
+import { EventDto } from "@/features/events/events.types";
 import { ReactNode } from "react";
 
 export const EVENT_STATUSES = [
@@ -39,6 +40,7 @@ export type EventCardProps = {
   dateLabel: string;
   locationText: string;
   status: EventStatus;
+  isVirtual: boolean;
   onEdit?: () => void;
   onDetails?: () => void;
   onDelete?: () => void;
@@ -47,4 +49,10 @@ export type EventCardProps = {
 export type SectionHeadingProps = {
     icon: ReactNode;
     title: string;
+};
+
+export type CreateEventFormProps = {
+    mode?: "create" | "edit";
+    eventId?: string;
+    initialEvent?: EventDto;
 };
