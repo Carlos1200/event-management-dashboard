@@ -10,11 +10,15 @@
     "seed": "node scripts/seed-mockapi.mjs"
   },
   "dependencies": {
+    "@hookform/resolvers": "5.2.2",
     "@tanstack/react-query": "5.90.21",
     "lucide-react": "0.577.0",
     "next": "16.1.6",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "react-hook-form": "7.71.2",
+    "sileo": "0.1.5",
+    "yup": "1.7.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "4",

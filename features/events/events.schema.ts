@@ -1,0 +1,68 @@
+import * as yup from "yup";
+import type { CreateEventInput, EventStatus } from "./events.types";
+
+export const eventStatusOptions = [
+  "confirmed",
+  "pending",
+  "draft",
+  "cancelled",
+] as const;
+
+export type CreateEventFormValues = {
+  title: string;
+  status: EventStatus;
+  startDate: string;
+  startTime: string;
+  locationText: string;
+  isVirtual: boolean;
+};
+
+export const createEventFormSchema: yup.ObjectSchema<CreateEventFormValues> = yup
+  .object({
+    title: yup
+      .string()
+      .trim()
+      .min(3, "Title must have at least 3 characters")
+      .max(120, "Title must have at most 120 characters")
+      .required("Title is required"),
+    status: yup
+      .mixed<EventStatus>()
+      .oneOf(eventStatusOptions)
+      .required("Status is required"),
+    startDate: yup
+      .string()
+      .required("Start date is required")
+      .matches(/^\d{4}-\d{2}-\d{2}$/, "Start date is invalid"),
+    startTime: yup
+      .string()
+      .required("Start time is required")
+      .matches(/^\d{2}:\d{2}$/, "Start time is invalid"),
+    locationText: yup
+      .string()
+      .trim()
+      .defined()
+      .when("isVirtual", {
+        is: true,
+        then: (schema) =>
+          schema.max(140, "Location must have at most 140 characters"),
+        otherwise: (schema) =>
+          schema
+            .min(3, "Location must have at least 3 characters")
+            .max(140, "Location must have at most 140 characters")
+            .required("Location is required"),
+      }),
+    isVirtual: yup.boolean().required(),
+  })
+  .required();
+
+export function mapFormValuesToCreateEventInput(
+  values: CreateEventFormValues,
+): CreateEventInput {
+  return {
+    title: values.title.trim(),
+    status: values.status,
+    startAt: `${values.startDate}T${values.startTime}`,
+    locationText: values.isVirtual ? "" : values.locationText.trim(),
+    isVirtual: values.isVirtual,
+  };
+}

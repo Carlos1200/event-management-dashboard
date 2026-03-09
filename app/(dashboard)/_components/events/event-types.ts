@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 export const EVENT_STATUSES = [
   "confirmed",
   "pending",
@@ -40,4 +42,9 @@ export type EventCardProps = {
   onEdit?: () => void;
   onDetails?: () => void;
   onDelete?: () => void;
+};
+
+export type SectionHeadingProps = {
+    icon: ReactNode;
+    title: string;
 };

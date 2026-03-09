@@ -9,3 +9,11 @@ export type EventDto = {
   locationText: string;
   isVirtual: boolean;
 };
+
+export type CreateEventInput = {
+  title: string;
+  status: EventStatus;
+  startAt: string;
+  locationText: string;
+  isVirtual: boolean;
+};
